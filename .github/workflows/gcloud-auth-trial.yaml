@@ -2,7 +2,7 @@ name: Gcloud SDK Auth Trial
 on:
   push:
     branches:
-    - main
+    - master
 
 env:
   GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
