@@ -93,9 +93,10 @@ jobs:
         run: |-
           docker push gcr.io/$env:GCP_PROJECT/$env:GCR_REPOSITORY-windows:$env:GITHUB_SHA
           docker push gcr.io/$env:GCP_PROJECT/$env:GCR_REPOSITORY-windows:latest
-  GKE-Deploy:
+  Dev-GKE-Deploy:
     runs-on: ubuntu-latest
     needs: [Linux-Image-Build, Windows-Image-Build]
+    environment: dev
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -125,3 +126,36 @@ jobs:
         run: |-
           sed -i "s/GITHUB_SHA/$GITHUB_SHA/g" deployment/deployment.yaml
           kubectl apply -f deployment/deployment.yaml
+  Prod-GKE-Deploy:
+    runs-on: ubuntu-latest
+    needs: [Dev-GKE-Deploy]
+    environment: prod
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@v3'
+        continue-on-error: false
+      - name: 'List Directory'
+        run: ls
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0'
+        continue-on-error: false
+        with:
+          workload_identity_provider: 'projects/1023629556233/locations/global/workloadIdentityPools/github-actions-trial/providers/github-actions'
+          service_account: 'github-actions-sa@prj-hotspot-foundations-trials.iam.gserviceaccount.com'
+          token_format: 'access_token'
+      - name: 'Setup GCloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'
+        continue-on-error: false
+      - name: 'GKE Credentials'
+        continue-on-error: false
+        run: |-
+          gcloud container clusters get-credentials $GKE_CLUSTER_NAME --zone $GKE_CLUSTER_ZONE --project $GCP_PROJECT
+      - name: 'Deploy to GKE'
+        continue-on-error: false
+        run: |-
+          sed -i "s/GITHUB_SHA/$GITHUB_SHA/g" deployment/prod-deployment.yaml
+          kubectl apply -f deployment/prod-deployment.yaml

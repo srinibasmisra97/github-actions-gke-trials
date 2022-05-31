@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prod-github-app
+  labels:
+    app: prod-github-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: prod-github-app
+  template:
+    metadata:
+      labels:
+        app: prod-github-app
+    spec:
+      containers:
+      - name: prod-github-app
+        image: gcr.io/prj-hotspot-foundations-trials/github-actions-trial:GITHUB_SHA
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
