@@ -5,11 +5,13 @@ on:
     - master
 
 env:
-  GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
+  GCP_PROJECT: prj-hotspot-foundations-trials
   GCR_REPOSITORY: github-actions-trial
+  GKE_CLUSTER_NAME: github-actions-test
+  GKE_CLUSTER_ZONE: us-central1-c
 
 jobs:
-  Gcloud-Auth:
+  GKE-Deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
@@ -47,3 +49,12 @@ jobs:
         run: |-
           docker push gcr.io/$GCP_PROJECT/$GCR_REPOSITORY:$GITHUB_SHA
           docker push gcr.io/$GCP_PROJECT/$GCR_REPOSITORY:latest
+      - name: 'GKE Credentials'
+        continue-on-error: false
+        run: |-
+          gcloud container clusters get-credentials $GKE_CLUSTER_NAME --zone $GKE_CLUSTER_ZONE --project $GCP_PROJECT
+      - name: 'Deploy to GKE'
+        continue-on-error: false
+        run: |-
+          sed -i "s/GITHUB_SHA/$GITHUB_SHA/g" deployment/deployment.yaml
+          kubectl apply -f deployment/deployment.yaml
