@@ -11,7 +11,7 @@ env:
   GKE_CLUSTER_ZONE: us-central1-c
 
 jobs:
-  GKE-Deploy:
+  Linux-Image-Build:
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
@@ -52,6 +52,65 @@ jobs:
         run: |-
           docker push gcr.io/$GCP_PROJECT/$GCR_REPOSITORY:$GITHUB_SHA
           docker push gcr.io/$GCP_PROJECT/$GCR_REPOSITORY:latest
+  Windows-Image-Build:
+    runs-on: windows-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@v3'
+        continue-on-error: false
+      - name: 'Update Response Value'
+        run: |-
+          sed -i "s/GITHUB_SHA/$GITHUB_SHA/g" source/main.py
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0'
+        continue-on-error: false
+        with:
+          workload_identity_provider: 'projects/1023629556233/locations/global/workloadIdentityPools/github-actions-trial/providers/github-actions'
+          service_account: 'github-actions-sa@prj-hotspot-foundations-trials.iam.gserviceaccount.com'
+          token_format: 'access_token'
+      - name: 'Setup GCloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'
+        continue-on-error: false
+      - name: 'Setup Docker Builder'
+        uses: 'docker/setup-buildx-action@v2'
+        continue-on-error: false
+      - name: 'Setup GCR Credentials'
+        continue-on-error: false
+        run: |-
+          gcloud auth configure-docker --quiet
+      - name: 'Docker Build'
+        continue-on-error: false
+        run: |-
+          cd ./source/
+          docker build ./ -t gcr.io/$GCP_PROJECT/$GCR_REPOSITORY:latest
+          docker tag gcr.io/$GCP_PROJECT/$GCR_REPOSITORY:latest gcr.io/$GCP_PROJECT/$GCR_REPOSITORY:$GITHUB_SHA
+      - name: 'Docker Push'
+        continue-on-error: false
+        run: |-
+          docker push gcr.io/$GCP_PROJECT/$GCR_REPOSITORY-windows:$GITHUB_SHA
+          docker push gcr.io/$GCP_PROJECT/$GCR_REPOSITORY-windows:latest
+  GKE-Deploy:
+    runs-on: ubuntu-latest
+    needs: [Linux-Image-Build, Windows-Image-Build]
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0'
+        continue-on-error: false
+        with:
+          workload_identity_provider: 'projects/1023629556233/locations/global/workloadIdentityPools/github-actions-trial/providers/github-actions'
+          service_account: 'github-actions-sa@prj-hotspot-foundations-trials.iam.gserviceaccount.com'
+          token_format: 'access_token'
+      - name: 'Setup GCloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'
+        continue-on-error: false
       - name: 'GKE Credentials'
         continue-on-error: false
         run: |-
