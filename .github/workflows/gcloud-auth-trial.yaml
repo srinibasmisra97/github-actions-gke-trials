@@ -86,8 +86,8 @@ jobs:
         continue-on-error: false
         run: |-
           cd ./source/
-          docker build ./ -t gcr.io/$env:GCP_PROJECT/$env:GCR_REPOSITORY:latest
-          docker tag gcr.io/$env:GCP_PROJECT/$env:GCR_REPOSITORY:latest gcr.io/$env:GCP_PROJECT/$env:GCR_REPOSITORY:$env:GITHUB_SHA
+          docker build ./ -t gcr.io/$env:GCP_PROJECT/$env:GCR_REPOSITORY-windows:latest
+          docker tag gcr.io/$env:GCP_PROJECT/$env:GCR_REPOSITORY-windows:latest gcr.io/$env:GCP_PROJECT/$env:GCR_REPOSITORY-windows:$env:GITHUB_SHA
       - name: 'Docker Push'
         continue-on-error: false
         run: |-
