@@ -100,6 +100,8 @@ jobs:
       contents: 'read'
       id-token: 'write'
     steps:
+      - name: 'List Directory'
+        run: ls
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v0'
