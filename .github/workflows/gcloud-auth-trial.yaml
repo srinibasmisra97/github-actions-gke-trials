@@ -1,0 +1,26 @@
+name: Gcloud SDK Auth Trial
+on:
+  push:
+    branches:
+    - main
+
+env:
+  GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
+
+jobs:
+  Gcloud-Auth:
+    runs-on: ubuntu-latest
+    steps:
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          workload_identity_provider: 'projects/1023629556233/locations/global/workloadIdentityPools/github-actions-trial/providers/github-actions'
+          service_account: 'github-actions-sa@prj-hotspot-foundations-trials.iam.gserviceaccount.com'
+      - name: 'Setup GCloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'
+      - run: |-
+          gcloud config set project $GCP_PROJECT
+      - run: |-
+          gcloud config get-value core/project
+          gcloud config get-value core/account
