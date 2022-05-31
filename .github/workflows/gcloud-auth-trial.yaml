@@ -40,5 +40,10 @@ jobs:
         continue-on-error: false
         run: |-
           cd ./source/
-          docker build ./ -t $GCP_PROJECT/$GCR_REPOSITORY:latest
-          docker tag $GCP_PROJECT/$GCR_REPOSITORY:latest $GCP_PROJECT/$GCR_REPOSITORY:$GITHUB_SHA
+          docker build ./ -t gcr.io/$GCP_PROJECT/$GCR_REPOSITORY:latest
+          docker tag gcr.io/$GCP_PROJECT/$GCR_REPOSITORY:latest gcr.io/$GCP_PROJECT/$GCR_REPOSITORY:$GITHUB_SHA
+      - name: 'Docker Push'
+        continue-on-error: false
+        run: |-
+          docker push gcr.io/$GCP_PROJECT/$GCR_REPOSITORY:$GITHUB_SHA
+          docker push gcr.io/$GCP_PROJECT/$GCR_REPOSITORY:latest
