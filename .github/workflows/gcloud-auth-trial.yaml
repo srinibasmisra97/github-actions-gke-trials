@@ -25,8 +25,17 @@ jobs:
           token_format: 'access_token'
       - name: 'Setup GCloud SDK'
         uses: 'google-github-actions/setup-gcloud@v0'
-      - run: |-
-          gcloud config set project $GCP_PROJECT
-      - run: |-
-          gcloud config get-value core/project
-          gcloud config get-value core/account
+      - name: 'Setup Docker Builder'
+        uses: 'docker/setup-buildx-action@v2'
+      - name: 'Setup GCR Credentials'
+        run: |-
+          gcloud auth configure-docker
+      - name: 'Docker Build and Push'
+        uses: 'docker/build-push-action@v3'
+        with:
+          context: ./source/
+          push: true
+          registry: gcr.io
+          tags: |
+            $GCP_PROJECT/github-actions-trial:latest
+            $GCP_PROJECT/github-actions-trial:$GITHUB_SHA
