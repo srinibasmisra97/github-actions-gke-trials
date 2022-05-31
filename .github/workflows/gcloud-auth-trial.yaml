@@ -52,8 +52,8 @@ jobs:
         run: |-
           docker push gcr.io/$GCP_PROJECT/$GCR_REPOSITORY:$GITHUB_SHA
           docker push gcr.io/$GCP_PROJECT/$GCR_REPOSITORY:latest
-  Macos-Image-Build:
-    runs-on: macos-latest
+  Windows-Image-Build:
+    runs-on: windows-latest
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -86,16 +86,16 @@ jobs:
         continue-on-error: false
         run: |-
           cd ./source/
-          docker build ./ -t gcr.io/$env:GCP_PROJECT/$GCR_REPOSITORY:latest
-          docker tag gcr.io/$GCP_PROJECT/$GCR_REPOSITORY:latest gcr.io/$GCP_PROJECT/$GCR_REPOSITORY:$GITHUB_SHA
+          docker build ./ -t gcr.io/$env:GCP_PROJECT/$env:GCR_REPOSITORY:latest
+          docker tag gcr.io/$env:GCP_PROJECT/$env:GCR_REPOSITORY:latest gcr.io/$env:GCP_PROJECT/$env:GCR_REPOSITORY:$env:GITHUB_SHA
       - name: 'Docker Push'
         continue-on-error: false
         run: |-
-          docker push gcr.io/$GCP_PROJECT/$GCR_REPOSITORY-windows:$GITHUB_SHA
-          docker push gcr.io/$GCP_PROJECT/$GCR_REPOSITORY-windows:latest
+          docker push gcr.io/$env:GCP_PROJECT/$env:GCR_REPOSITORY-windows:$env:GITHUB_SHA
+          docker push gcr.io/$env:GCP_PROJECT/$env:GCR_REPOSITORY-windows:latest
   GKE-Deploy:
     runs-on: ubuntu-latest
-    needs: [Linux-Image-Build, Macos-Image-Build]
+    needs: [Linux-Image-Build, Windows-Image-Build]
     permissions:
       contents: 'read'
       id-token: 'write'
