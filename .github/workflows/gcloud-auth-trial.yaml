@@ -63,7 +63,7 @@ jobs:
         continue-on-error: false
       - name: 'Update Response Value'
         run: |-
-          sed -i "s|GITHUB_SHA|$GITHUB_SHA|g" source/main.py
+          sed -i '' "s/GITHUB_SHA/$GITHUB_SHA/g" ./source/main.py
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v0'
