@@ -1,0 +1,17 @@
+{{ if .Values.frontend.ingress }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-frontend
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: {{ .Release.Name }}-frontend
+            port:
+              number: {{ .Values.frontend.port }}
+{{ end }}

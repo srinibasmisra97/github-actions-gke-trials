@@ -1,0 +1,12 @@
+backend:
+  port: 8080
+  image: nginx
+  imagePullPolicy: Always
+  replicas: 1
+
+frontend:
+  port: 8080
+  image: nginx
+  imagePullPolicy: Always
+  replicas: 1
+  ingress: true
